@@ -119,11 +119,11 @@ var DoNotDisturbIcon = new Lang.Class({
 	 * @constructor
 	 */
 	_init(){
-		this._indicatorArea = Main.panel.statusArea.aggregateMenu._indicators;
+		this._indicatorArea = Main.panel._centerBox;//statusArea.aggregateMenu._indicators;
 
 	    this._enabledIcon = new St.Icon({
 	            icon_name: 'notification-disabled-symbolic',
-	            style_class: 'popup-menu-icon'
+	            style_class: 'popup-menu-icon do-not-disturb-icon'
 	    });
 	},
 
@@ -131,7 +131,7 @@ var DoNotDisturbIcon = new Lang.Class({
 	 * Shows the status icon.
 	 */
 	show(){
-		this._indicatorArea.insert_child_at_index(this._enabledIcon, 0);
+		this._indicatorArea.insert_child_at_index(this._enabledIcon, 1);
 	},
 
 	/**
@@ -151,4 +151,25 @@ var DoNotDisturbIcon = new Lang.Class({
 	      this._enabledIcon = 0;
 	    }
 	},
+});
+
+var HideDotController = new Lang.Class({
+	Name: 'HideDotController',
+
+	_init(){
+		this._dot = Main.panel._centerBox.get_child_at_index(0).get_child_at_index(0).get_first_child().get_child_at_index(2);
+	},
+
+	hideDot(){
+		if(this._dot){
+			this._dot.add_style_class_name("hide-dot");
+		}
+	},
+
+	unhideDot(){
+		if(this._dot){
+			this._dot.remove_style_class_name("hide-dot");
+		}
+	},
+
 });

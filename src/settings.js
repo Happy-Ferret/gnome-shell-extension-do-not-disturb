@@ -15,15 +15,17 @@ var SettingsManager = new Lang.Class({
 	 */
 	_init(){
 		this._appSettings = _getSettings();
-		this._notificationSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.notifications'});
+		this._notificationSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.notifications' });
+		this._soundSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.sound' });
 	},
 
 	/**
-	 * Enable or disable do not disturb mode.
+	 * Enable or disable do not disturb mode (hide banners and mute sounds if enabled).
 	 * 
 	 * @param  {boolean} enabled - True if do not disturb should be enabled, false otherwise.
 	 */
 	setDoNotDisturb(enabled){
+		this._soundSettings.set_boolean('event-sounds', !enabled);
 		this._notificationSettings.set_boolean('show-banners', !enabled);
 	},
 
@@ -70,6 +72,86 @@ var SettingsManager = new Lang.Class({
 	 */
 	onShowIconChanged(fn){
 		this._appSettings.connect('changed::show-icon', fn);
+	},
+
+	/**
+	 * Determines if the sound should be muted when do not disturb is enabled. 
+	 * 
+	 * @returns {boolean} - True if the sound should be muted when do not disturb is enabled, false otherwise.
+	 */
+	shouldMuteSound(){
+		return this._appSettings.get_boolean('mute-sounds');
+	},
+
+	/**
+	 * Enable or disable the muting of sound when do not disturb mode is enabled.
+	 * 
+	 * @param  {boolean} muteSound - True if the sound should be muted when do not disturb is enabled, false otherwise.
+	 */
+	setShouldMuteSound(muteSound){
+		this._appSettings.set_boolean('mute-sounds', muteSound);
+	},
+
+	/**
+	 * Calls a function when the status of the mute sounds setting has changed.
+	 * 
+	 * @param {() => ()} fn - The function to call when the mute sounds setting is changed.
+	 */
+	onMuteSoundChanged(fn){
+		this._appSettings.connect('changed::mute-sounds', fn);
+	},
+
+	/**
+	 * Determines if the notification dot should be hidden when do not disturb is enabled. 
+	 * 
+	 * @returns {boolean} - True if the notification dot should be hidden when do not disturb is enabled, false otherwise.
+	 */
+	shouldHideNotificationDot(){
+		return this._appSettings.get_boolean('hide-dot');
+	},
+
+	/**
+	 * Enable or disable the hiding of the notification dot when do not disturb mode is enabled.
+	 * 
+	 * @param  {boolean} hideDot - True if the notification dot should be hidden when do not disturb is enabled, false otherwise.
+	 */
+	setShouldHideNotificationDot(hideDot){
+		this._appSettings.set_boolean('hide-dot', hideDot);
+	},
+
+	/**
+	 * Calls a function when the status of the hide notification dot setting has changed.
+	 * 
+	 * @param {() => ()} fn - The function to call when the hide notification dot setting is changed.
+	 */
+	onHideNotificationDotChanged(fn){
+		this._appSettings.connect('changed::hide-dot', fn);
+	},
+
+	/**
+	 * Mutes all sounds.
+	 */
+	muteAllSounds(){
+		var [res, stdout, stderr, status] = GLib.spawn_sync(
+	        null,
+	        ["amixer", "-q", "-D", "pulse", "sset", "Master", "mute"],
+	        null,
+	        GLib.SpawnFlags.SEARCH_PATH,
+	        null,
+	        null);
+	},
+
+	/**
+	 * Unmutes all sounds.
+	 */
+	unmuteAllSounds(){
+		var [res, stdout, stderr, status] = GLib.spawn_sync(
+	        null,
+	        ["amixer", "-q", "-D", "pulse", "sset", "Master", "unmute"],
+	        null,
+	        GLib.SpawnFlags.SEARCH_PATH,
+	        null,
+	        null);	
 	},
 });
 
