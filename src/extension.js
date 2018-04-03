@@ -2,7 +2,6 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings; 
 const Widget = Me.imports.widgets;
 
-
 /**
  * Called when the extension is loaded.
  */
@@ -48,8 +47,7 @@ function disable() {
  * Toggle the status of the do not disturb mode in _settings.
  */
 function _toggle(){
-  let status = this._settings.isDoNotDisturb();
-  this._settings.setDoNotDisturb(!status); // This will trigger a call to _sync
+  this._settings.setDoNotDisturb(this._disturbToggle.getToggleState()); // This will trigger a call to _sync
 }
 
 /**
@@ -75,12 +73,11 @@ function _sync(){
 
   if(enabled && muteSounds){
     this._settings.muteAllSounds();
-  } else if (lastMuteState && !muteSounds){
+  } else if (this._lastMuteState && !muteSounds){
     this._settings.unmuteAllSounds();
   }
 
-  lastMuteState = muteSounds;
+  this._lastMuteState = muteSounds;
 
   this._disturbToggle.setToggleState(enabled);
-
 }
